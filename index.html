@@ -2,10 +2,9 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>Two-Deck DJ YouTube Player</title>
+  <title>Two-Deck DJ YouTube Player with Looping</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
-    /* (Include your CSS from the code sample above) */
     body { 
       font-family: Arial, sans-serif; 
       margin: 20px; 
@@ -72,15 +71,17 @@
   </style>
 </head>
 <body>
-  <h1>Two-Deck DJ YouTube Player</h1>
+  <h1>Two-Deck DJ YouTube Player with Looping</h1>
   <p>
     Enter a YouTube link for each deck, then control each independently.<br>
     <strong>Keyboard Shortcuts:</strong><br>
-    Deck 1 = normal key; Deck 2 = hold Shift + key  
-    • Space: Play/Pause  
-    • C: Set Cue  
-    • ←/→: Prev/Next Cue  
-    • ↑/↓: Speed ±  
+    • **Space**: Play/Pause (Shift for Deck 2)<br>
+    • **C**: Set Cue (Shift for Deck 2)<br>
+    • **V**: Jump to Cue (Shift for Deck 2)<br>
+    • **O**: Set Loop Start (Shift for Deck 2)<br>
+    • **P**: Set Loop End (Shift for Deck 2)<br>
+    • **L**: Toggle Loop (Shift for Deck 2)<br>
+    • **Arrow Up/Down**: Increase/Decrease speed (Shift for Deck 2)
   </p>
 
   <!-- Deck 1 -->
@@ -99,9 +100,11 @@
     <!-- Mobile / Onscreen Controls for Deck 1 -->
     <div class="mobileControls" id="mobileControls1">
       <button id="btn-play1">Play/Pause</button>
-      <button id="btn-set-cue1">Set Cue</button>
-      <button id="btn-prev-cue1">Prev Cue</button>
-      <button id="btn-next-cue1">Next Cue</button>
+      <button id="btn-set-cue1">Set Cue (C)</button>
+      <button id="btn-read-cue1">Read Cue (V)</button>
+      <button id="btn-loop-start1">Set Loop Start (O)</button>
+      <button id="btn-loop-end1">Set Loop End (P)</button>
+      <button id="btn-toggle-loop1">Toggle Loop: Off (L)</button>
     </div>
 
     <!-- Playback Rate Slider for Deck 1 -->
@@ -131,9 +134,11 @@
     <!-- Mobile / Onscreen Controls for Deck 2 -->
     <div class="mobileControls" id="mobileControls2">
       <button id="btn-play2">Play/Pause</button>
-      <button id="btn-set-cue2">Set Cue</button>
-      <button id="btn-prev-cue2">Prev Cue</button>
-      <button id="btn-next-cue2">Next Cue</button>
+      <button id="btn-set-cue2">Set Cue (C)</button>
+      <button id="btn-read-cue2">Read Cue (V)</button>
+      <button id="btn-loop-start2">Set Loop Start (O)</button>
+      <button id="btn-loop-end2">Set Loop End (P)</button>
+      <button id="btn-toggle-loop2">Toggle Loop: Off (L)</button>
     </div>
 
     <!-- Playback Rate Slider for Deck 2 -->
@@ -153,6 +158,10 @@
     let player1, player2;
     let cuePoints1 = [];
     let cuePoints2 = [];
+    // Loop variables for Deck 1
+    let loopStart1 = null, loopEnd1 = null, loopActive1 = false;
+    // Loop variables for Deck 2
+    let loopStart2 = null, loopEnd2 = null, loopActive2 = false;
 
     // Helper: extract YouTube video ID from a URL
     function extractVideoID(url) {
@@ -163,10 +172,10 @@
 
     // Called automatically by the YouTube IFrame API
     function onYouTubeIframeAPIReady() {
-      // We'll create players once the user clicks "Load Video"
+      // Players will be created when videos are loaded.
     }
 
-    // Deck 1: load video or switch video
+    // ----- Deck 1 Functions -----
     function loadVideoDeck1(videoId) {
       if (player1) {
         player1.loadVideoById(videoId);
@@ -176,13 +185,69 @@
           width: '320',
           videoId: videoId,
           playerVars: { autoplay: 0 },
-          events: {
-            'onReady': onPlayerReadyDeck1
-          }
+          events: { 'onReady': onPlayerReadyDeck1 }
         });
       }
     }
-    // Deck 2: load video or switch video
+    function onPlayerReadyDeck1() {
+      console.log("Deck 1 ready.");
+      const rate = parseFloat(document.getElementById('speed-slider1').value);
+      player1.setPlaybackRate(rate);
+    }
+    function togglePlayPauseDeck1() {
+      if (!player1) return;
+      const state = player1.getPlayerState();
+      state === YT.PlayerState.PLAYING ? player1.pauseVideo() : player1.playVideo();
+    }
+    function setCueDeck1() {
+      if (!player1) return;
+      const t = player1.getCurrentTime();
+      cuePoints1.push(t);
+      cuePoints1.sort((a, b) => a - b);
+      updateCueList1();
+    }
+    function readCueDeck1() {
+      if (!player1 || cuePoints1.length === 0) return;
+      const lastCue = cuePoints1[cuePoints1.length - 1];
+      player1.seekTo(lastCue, true);
+    }
+    function changeRateDeck1(value) {
+      if (!player1) return;
+      player1.setPlaybackRate(value);
+      document.getElementById('speedValue1').textContent = value.toFixed(2);
+    }
+    // Loop functions for Deck 1
+    function setLoopStartDeck1() {
+      if (!player1) return;
+      loopStart1 = player1.getCurrentTime();
+      alert("Deck 1: Loop start set to " + loopStart1.toFixed(2) + "s");
+    }
+    function setLoopEndDeck1() {
+      if (!player1) return;
+      loopEnd1 = player1.getCurrentTime();
+      alert("Deck 1: Loop end set to " + loopEnd1.toFixed(2) + "s");
+    }
+    function toggleLoopDeck1() {
+      if (!player1 || loopStart1 === null || loopEnd1 === null) {
+        alert("Deck 1: Set both loop start and loop end first.");
+        return;
+      }
+      loopActive1 = !loopActive1;
+      document.getElementById('btn-toggle-loop1').textContent = loopActive1 ? "Toggle Loop: On (L)" : "Toggle Loop: Off (L)";
+    }
+    function updateCueList1() {
+      const listDiv = document.getElementById('cueList1');
+      if (cuePoints1.length === 0) {
+        listDiv.innerHTML = "<h4>Cue Points</h4><p>No cues yet.</p>";
+      } else {
+        let html = "<h4>Cue Points</h4><ul>";
+        cuePoints1.forEach(time => { html += `<li>${time.toFixed(2)}s</li>`; });
+        html += "</ul>";
+        listDiv.innerHTML = html;
+      }
+    }
+
+    // ----- Deck 2 Functions -----
     function loadVideoDeck2(videoId) {
       if (player2) {
         player2.loadVideoById(videoId);
@@ -192,110 +257,19 @@
           width: '320',
           videoId: videoId,
           playerVars: { autoplay: 0 },
-          events: {
-            'onReady': onPlayerReadyDeck2
-          }
+          events: { 'onReady': onPlayerReadyDeck2 }
         });
       }
-    }
-
-    function onPlayerReadyDeck1() {
-      console.log("Deck 1 ready.");
-      // Set initial rate from slider
-      const rate = parseFloat(document.getElementById('speed-slider1').value);
-      player1.setPlaybackRate(rate);
     }
     function onPlayerReadyDeck2() {
       console.log("Deck 2 ready.");
-      // Set initial rate from slider
       const rate = parseFloat(document.getElementById('speed-slider2').value);
       player2.setPlaybackRate(rate);
     }
-
-    // Update deck 1 cue list
-    function updateCueList1() {
-      const listDiv = document.getElementById('cueList1');
-      if (cuePoints1.length === 0) {
-        listDiv.innerHTML = "<h4>Cue Points</h4><p>No cues yet.</p>";
-      } else {
-        let html = "<h4>Cue Points</h4><ul>";
-        cuePoints1.forEach(time => {
-          html += `<li>${time.toFixed(2)}s</li>`;
-        });
-        html += "</ul>";
-        listDiv.innerHTML = html;
-      }
-    }
-    // Update deck 2 cue list
-    function updateCueList2() {
-      const listDiv = document.getElementById('cueList2');
-      if (cuePoints2.length === 0) {
-        listDiv.innerHTML = "<h4>Cue Points</h4><p>No cues yet.</p>";
-      } else {
-        let html = "<h4>Cue Points</h4><ul>";
-        cuePoints2.forEach(time => {
-          html += `<li>${time.toFixed(2)}s</li>`;
-        });
-        html += "</ul>";
-        listDiv.innerHTML = html;
-      }
-    }
-
-    // ----- Deck 1 Controls -----
-    function togglePlayPauseDeck1() {
-      if (!player1) return;
-      const state = player1.getPlayerState();
-      if (state === YT.PlayerState.PLAYING) {
-        player1.pauseVideo();
-      } else {
-        player1.playVideo();
-      }
-    }
-    function setCueDeck1() {
-      if (!player1) return;
-      const t = player1.getCurrentTime();
-      cuePoints1.push(t);
-      cuePoints1.sort((a, b) => a - b);
-      updateCueList1();
-    }
-    function nextCueDeck1() {
-      if (!player1 || cuePoints1.length === 0) return;
-      const now = player1.getCurrentTime();
-      const nextCue = cuePoints1.find(time => time > now);
-      if (nextCue !== undefined) {
-        player1.seekTo(nextCue, true);
-      }
-    }
-    function prevCueDeck1() {
-      if (!player1 || cuePoints1.length === 0) return;
-      const now = player1.getCurrentTime();
-      let prevCue = null;
-      for (let i = 0; i < cuePoints1.length; i++) {
-        if (cuePoints1[i] < now) {
-          prevCue = cuePoints1[i];
-        } else {
-          break;
-        }
-      }
-      if (prevCue !== null) {
-        player1.seekTo(prevCue, true);
-      }
-    }
-    function changeRateDeck1(value) {
-      if (!player1) return;
-      player1.setPlaybackRate(value);
-      document.getElementById('speedValue1').textContent = value.toFixed(2);
-    }
-
-    // ----- Deck 2 Controls -----
     function togglePlayPauseDeck2() {
       if (!player2) return;
       const state = player2.getPlayerState();
-      if (state === YT.PlayerState.PLAYING) {
-        player2.pauseVideo();
-      } else {
-        player2.playVideo();
-      }
+      state === YT.PlayerState.PLAYING ? player2.pauseVideo() : player2.playVideo();
     }
     function setCueDeck2() {
       if (!player2) return;
@@ -304,137 +278,159 @@
       cuePoints2.sort((a, b) => a - b);
       updateCueList2();
     }
-    function nextCueDeck2() {
+    function readCueDeck2() {
       if (!player2 || cuePoints2.length === 0) return;
-      const now = player2.getCurrentTime();
-      const nextCue = cuePoints2.find(time => time > now);
-      if (nextCue !== undefined) {
-        player2.seekTo(nextCue, true);
-      }
-    }
-    function prevCueDeck2() {
-      if (!player2 || cuePoints2.length === 0) return;
-      const now = player2.getCurrentTime();
-      let prevCue = null;
-      for (let i = 0; i < cuePoints2.length; i++) {
-        if (cuePoints2[i] < now) {
-          prevCue = cuePoints2[i];
-        } else {
-          break;
-        }
-      }
-      if (prevCue !== null) {
-        player2.seekTo(prevCue, true);
-      }
+      const lastCue = cuePoints2[cuePoints2.length - 1];
+      player2.seekTo(lastCue, true);
     }
     function changeRateDeck2(value) {
       if (!player2) return;
       player2.setPlaybackRate(value);
       document.getElementById('speedValue2').textContent = value.toFixed(2);
     }
+    // Loop functions for Deck 2
+    function setLoopStartDeck2() {
+      if (!player2) return;
+      loopStart2 = player2.getCurrentTime();
+      alert("Deck 2: Loop start set to " + loopStart2.toFixed(2) + "s");
+    }
+    function setLoopEndDeck2() {
+      if (!player2) return;
+      loopEnd2 = player2.getCurrentTime();
+      alert("Deck 2: Loop end set to " + loopEnd2.toFixed(2) + "s");
+    }
+    function toggleLoopDeck2() {
+      if (!player2 || loopStart2 === null || loopEnd2 === null) {
+        alert("Deck 2: Set both loop start and loop end first.");
+        return;
+      }
+      loopActive2 = !loopActive2;
+      document.getElementById('btn-toggle-loop2').textContent = loopActive2 ? "Toggle Loop: On (L)" : "Toggle Loop: Off (L)";
+    }
+    function updateCueList2() {
+      const listDiv = document.getElementById('cueList2');
+      if (cuePoints2.length === 0) {
+        listDiv.innerHTML = "<h4>Cue Points</h4><p>No cues yet.</p>";
+      } else {
+        let html = "<h4>Cue Points</h4><ul>";
+        cuePoints2.forEach(time => { html += `<li>${time.toFixed(2)}s</li>`; });
+        html += "</ul>";
+        listDiv.innerHTML = html;
+      }
+    }
 
     // ----- Event Listeners -----
     window.addEventListener('DOMContentLoaded', () => {
-      // Deck 1
+      // Deck 1 controls
       document.getElementById('loadVideo1').addEventListener('click', () => {
         const url = document.getElementById('videoLink1').value;
         const videoId = extractVideoID(url);
-        if (videoId) loadVideoDeck1(videoId);
-        else alert("Invalid YouTube link for Deck 1");
+        videoId ? loadVideoDeck1(videoId) : alert("Invalid YouTube link for Deck 1");
       });
       document.getElementById('btn-play1').addEventListener('click', togglePlayPauseDeck1);
       document.getElementById('btn-set-cue1').addEventListener('click', setCueDeck1);
-      document.getElementById('btn-prev-cue1').addEventListener('click', prevCueDeck1);
-      document.getElementById('btn-next-cue1').addEventListener('click', nextCueDeck1);
+      document.getElementById('btn-read-cue1').addEventListener('click', readCueDeck1);
+      document.getElementById('btn-loop-start1').addEventListener('click', setLoopStartDeck1);
+      document.getElementById('btn-loop-end1').addEventListener('click', setLoopEndDeck1);
+      document.getElementById('btn-toggle-loop1').addEventListener('click', toggleLoopDeck1);
       document.getElementById('speed-slider1').addEventListener('input', (e) => {
-        const rate = parseFloat(e.target.value);
-        changeRateDeck1(rate);
+        changeRateDeck1(parseFloat(e.target.value));
       });
 
-      // Deck 2
+      // Deck 2 controls
       document.getElementById('loadVideo2').addEventListener('click', () => {
         const url = document.getElementById('videoLink2').value;
         const videoId = extractVideoID(url);
-        if (videoId) loadVideoDeck2(videoId);
-        else alert("Invalid YouTube link for Deck 2");
+        videoId ? loadVideoDeck2(videoId) : alert("Invalid YouTube link for Deck 2");
       });
       document.getElementById('btn-play2').addEventListener('click', togglePlayPauseDeck2);
       document.getElementById('btn-set-cue2').addEventListener('click', setCueDeck2);
-      document.getElementById('btn-prev-cue2').addEventListener('click', prevCueDeck2);
-      document.getElementById('btn-next-cue2').addEventListener('click', nextCueDeck2);
+      document.getElementById('btn-read-cue2').addEventListener('click', readCueDeck2);
+      document.getElementById('btn-loop-start2').addEventListener('click', setLoopStartDeck2);
+      document.getElementById('btn-loop-end2').addEventListener('click', setLoopEndDeck2);
+      document.getElementById('btn-toggle-loop2').addEventListener('click', toggleLoopDeck2);
       document.getElementById('speed-slider2').addEventListener('input', (e) => {
-        const rate = parseFloat(e.target.value);
-        changeRateDeck2(rate);
+        changeRateDeck2(parseFloat(e.target.value));
       });
     });
 
     // ----- Keyboard Shortcuts -----
     document.addEventListener('keydown', (e) => {
-      // If Shift is pressed => Deck 2, else Deck 1
+      // Without Shift => Deck 1; with Shift => Deck 2
       const isShift = e.shiftKey;
-
-      switch(e.key) {
+      const key = e.key.toLowerCase();
+      switch(key) {
         case " ":
-          e.preventDefault(); // prevent scrolling
-          if (isShift) togglePlayPauseDeck2();
-          else togglePlayPauseDeck1();
+          e.preventDefault(); // Prevent scrolling
+          isShift ? togglePlayPauseDeck2() : togglePlayPauseDeck1();
           break;
         case "c":
-        case "C":
-          if (isShift) setCueDeck2();
-          else setCueDeck1();
+          isShift ? setCueDeck2() : setCueDeck1();
           break;
-        case "ArrowRight":
-          if (isShift) nextCueDeck2();
-          else nextCueDeck1();
+        case "v":
+          isShift ? readCueDeck2() : readCueDeck1();
           break;
-        case "ArrowLeft":
-          if (isShift) prevCueDeck2();
-          else prevCueDeck1();
-          break;
-        case "ArrowUp":
-          {
-            // Increase speed by 0.25
-            if (isShift) {
-              if (player2) {
-                let r = player2.getPlaybackRate();
-                r = Math.min(r + 0.25, 2.0);
-                changeRateDeck2(r);
-                document.getElementById('speed-slider2').value = r;
-              }
-            } else {
-              if (player1) {
-                let r = player1.getPlaybackRate();
-                r = Math.min(r + 0.25, 2.0);
-                changeRateDeck1(r);
-                document.getElementById('speed-slider1').value = r;
-              }
+        case "arrowup":
+          if (isShift) {
+            if (player2) {
+              let r = player2.getPlaybackRate();
+              r = Math.min(r + 0.25, 2.0);
+              changeRateDeck2(r);
+              document.getElementById('speed-slider2').value = r;
+            }
+          } else {
+            if (player1) {
+              let r = player1.getPlaybackRate();
+              r = Math.min(r + 0.25, 2.0);
+              changeRateDeck1(r);
+              document.getElementById('speed-slider1').value = r;
             }
           }
           break;
-        case "ArrowDown":
-          {
-            // Decrease speed by 0.25
-            if (isShift) {
-              if (player2) {
-                let r = player2.getPlaybackRate();
-                r = Math.max(r - 0.25, 0.25);
-                changeRateDeck2(r);
-                document.getElementById('speed-slider2').value = r;
-              }
-            } else {
-              if (player1) {
-                let r = player1.getPlaybackRate();
-                r = Math.max(r - 0.25, 0.25);
-                changeRateDeck1(r);
-                document.getElementById('speed-slider1').value = r;
-              }
+        case "arrowdown":
+          if (isShift) {
+            if (player2) {
+              let r = player2.getPlaybackRate();
+              r = Math.max(r - 0.25, 0.25);
+              changeRateDeck2(r);
+              document.getElementById('speed-slider2').value = r;
+            }
+          } else {
+            if (player1) {
+              let r = player1.getPlaybackRate();
+              r = Math.max(r - 0.25, 0.25);
+              changeRateDeck1(r);
+              document.getElementById('speed-slider1').value = r;
             }
           }
+          break;
+        // Loop keyboard shortcuts
+        case "o": // Set loop start
+          isShift ? setLoopStartDeck2() : setLoopStartDeck1();
+          break;
+        case "p": // Set loop end
+          isShift ? setLoopEndDeck2() : setLoopEndDeck1();
+          break;
+        case "l": // Toggle loop on/off
+          isShift ? toggleLoopDeck2() : toggleLoopDeck1();
           break;
       }
     });
+
+    // ----- Loop Polling -----
+    // Check every 250ms if a deck is in loop mode and if so, loop it.
+    setInterval(() => {
+      if (loopActive1 && player1 && loopStart1 !== null && loopEnd1 !== null) {
+        if (player1.getCurrentTime() >= loopEnd1) {
+          player1.seekTo(loopStart1, true);
+        }
+      }
+      if (loopActive2 && player2 && loopStart2 !== null && loopEnd2 !== null) {
+        if (player2.getCurrentTime() >= loopEnd2) {
+          player2.seekTo(loopStart2, true);
+        }
+      }
+    }, 250);
   </script>
 </body>
 </html>
-
