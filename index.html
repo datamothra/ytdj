@@ -2,12 +2,12 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>Two-Deck DJ YouTube Player with Looping</title>
+  <title>Two-Deck DJ YouTube Player with Fine Playback Rate Control, Looping, Seeking & Mixer</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
-    body { 
-      font-family: Arial, sans-serif; 
-      margin: 20px; 
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
       text-align: center;
     }
     .deck-container {
@@ -52,7 +52,7 @@
     }
     .slider-label {
       display: inline-block;
-      width: 120px;
+      width: 140px;
       text-align: right;
       margin-right: 5px;
     }
@@ -61,43 +61,47 @@
       width: 120px;
     }
     .cue-list {
-      text-align: left; 
-      display: inline-block; 
+      text-align: left;
+      display: inline-block;
       margin-top: 10px;
     }
     ul {
       padding-left: 20px;
     }
+    /* Crossfade slider styling */
+    #crossfadeContainer {
+      margin: 20px auto;
+      max-width: 400px;
+      text-align: center;
+      border-top: 2px solid #ccc;
+      padding-top: 15px;
+    }
   </style>
 </head>
 <body>
-  <h1>Two-Deck DJ YouTube Player with Looping</h1>
+  <h1>Two-Deck DJ YouTube Player with Fine Playback Rate Control, Looping, Seeking & Mixer</h1>
   <p>
     Enter a YouTube link for each deck, then control each independently.<br>
     <strong>Keyboard Shortcuts:</strong><br>
-    • **Space**: Play/Pause (Shift for Deck 2)<br>
-    • **C**: Set Cue (Shift for Deck 2)<br>
-    • **V**: Jump to Cue (Shift for Deck 2)<br>
-    • **O**: Set Loop Start (Shift for Deck 2)<br>
-    • **P**: Set Loop End (Shift for Deck 2)<br>
-    • **L**: Toggle Loop (Shift for Deck 2)<br>
-    • **Arrow Up/Down**: Increase/Decrease speed (Shift for Deck 2)
+    • Space: Play/Pause (Shift for Deck 2)<br>
+    • C: Set Cue (Shift+C for Deck 2)<br>
+    • V: Jump to Cue (Shift+V for Deck 2)<br>
+    • O: Set Loop Start (Shift+O for Deck 2)<br>
+    • P: Set Loop End (Shift+P for Deck 2, auto-starts loop)<br>
+    • L: Toggle Loop (Shift+L for Deck 2)<br>
+    • B/N: Broad Seek Backward/Forward 5s (Shift+B/N for Deck 2)<br>
+    • J/K: Fine (Turntable) Seek Backward/Forward 0.25s (Shift+J/K for Deck 2)<br>
+    • Arrow Up/Down: Increase/Decrease speed (fine adjustments: 0.05 increments; Shift for Deck 2)
   </p>
 
   <!-- Deck 1 -->
   <div class="deck-container">
     <div class="deck-title">Deck 1</div>
-    
-    <!-- Input & Load button -->
     <div class="video-input">
       <input type="text" id="videoLink1" placeholder="https://www.youtube.com/watch?v=VIDEO_ID" size="40">
       <button id="loadVideo1">Load Video (Deck 1)</button>
     </div>
-    
-    <!-- YouTube player area -->
     <div id="player1" class="player-section"></div>
-    
-    <!-- Mobile / Onscreen Controls for Deck 1 -->
     <div class="mobileControls" id="mobileControls1">
       <button id="btn-play1">Play/Pause</button>
       <button id="btn-set-cue1">Set Cue (C)</button>
@@ -105,50 +109,57 @@
       <button id="btn-loop-start1">Set Loop Start (O)</button>
       <button id="btn-loop-end1">Set Loop End (P)</button>
       <button id="btn-toggle-loop1">Toggle Loop: Off (L)</button>
+      <br>
+      <button id="btn-broad-back1">Broad - (B)</button>
+      <button id="btn-broad-forward1">Broad + (N)</button>
+      <button id="btn-fine-back1">Turntable - (J)</button>
+      <button id="btn-fine-forward1">Turntable + (K)</button>
     </div>
-
-    <!-- Playback Rate Slider for Deck 1 -->
     <div class="slider-container">
       <label for="speed-slider1" class="slider-label">Deck 1 Rate:</label>
-      <input type="range" id="speed-slider1" min="0.25" max="2.0" step="0.05" value="1.0">
+      <!-- Finer control: step now 0.01 -->
+      <input type="range" id="speed-slider1" min="0.25" max="2.0" step="0.01" value="1.0">
       <span id="speedValue1">1.00</span>x
     </div>
-    
-    <!-- Cue list display for Deck 1 -->
     <div id="cueList1" class="cue-list"></div>
+  </div>
+
+  <!-- Mixer Crossfade Slider (placed between decks) -->
+  <div id="crossfadeContainer" class="slider-container">
+    <label for="crossfade-slider" class="slider-label">Mixer Crossfade:</label>
+    <input type="range" id="crossfade-slider" min="0" max="100" step="1" value="50">
+    <span id="crossfadeValue">50</span>%
+    <p>(0 = Deck 1 only, 100 = Deck 2 only)</p>
   </div>
 
   <!-- Deck 2 -->
   <div class="deck-container">
     <div class="deck-title">Deck 2</div>
-    
-    <!-- Input & Load button -->
     <div class="video-input">
       <input type="text" id="videoLink2" placeholder="https://www.youtube.com/watch?v=VIDEO_ID" size="40">
       <button id="loadVideo2">Load Video (Deck 2)</button>
     </div>
-    
-    <!-- YouTube player area -->
     <div id="player2" class="player-section"></div>
-    
-    <!-- Mobile / Onscreen Controls for Deck 2 -->
     <div class="mobileControls" id="mobileControls2">
-      <button id="btn-play2">Play/Pause</button>
-      <button id="btn-set-cue2">Set Cue (C)</button>
-      <button id="btn-read-cue2">Read Cue (V)</button>
-      <button id="btn-loop-start2">Set Loop Start (O)</button>
-      <button id="btn-loop-end2">Set Loop End (P)</button>
-      <button id="btn-toggle-loop2">Toggle Loop: Off (L)</button>
+      <!-- Updated labels to indicate Shift -->
+      <button id="btn-play2">Play/Pause (Shift)</button>
+      <button id="btn-set-cue2">Set Cue (Shift+C)</button>
+      <button id="btn-read-cue2">Read Cue (Shift+V)</button>
+      <button id="btn-loop-start2">Set Loop Start (Shift+O)</button>
+      <button id="btn-loop-end2">Set Loop End (Shift+P)</button>
+      <button id="btn-toggle-loop2">Toggle Loop: Off (Shift+L)</button>
+      <br>
+      <button id="btn-broad-back2">Broad - (Shift+B)</button>
+      <button id="btn-broad-forward2">Broad + (Shift+N)</button>
+      <button id="btn-fine-back2">Turntable - (Shift+J)</button>
+      <button id="btn-fine-forward2">Turntable + (Shift+K)</button>
     </div>
-
-    <!-- Playback Rate Slider for Deck 2 -->
     <div class="slider-container">
       <label for="speed-slider2" class="slider-label">Deck 2 Rate:</label>
-      <input type="range" id="speed-slider2" min="0.25" max="2.0" step="0.05" value="1.0">
+      <!-- Finer control: step now 0.01 -->
+      <input type="range" id="speed-slider2" min="0.25" max="2.0" step="0.01" value="1.0">
       <span id="speedValue2">1.00</span>x
     </div>
-    
-    <!-- Cue list display for Deck 2 -->
     <div id="cueList2" class="cue-list"></div>
   </div>
 
@@ -156,23 +167,22 @@
   <script src="https://www.youtube.com/iframe_api"></script>
   <script>
     let player1, player2;
-    let cuePoints1 = [];
-    let cuePoints2 = [];
+    let cuePoints1 = [], cuePoints2 = [];
     // Loop variables for Deck 1
     let loopStart1 = null, loopEnd1 = null, loopActive1 = false;
     // Loop variables for Deck 2
     let loopStart2 = null, loopEnd2 = null, loopActive2 = false;
 
-    // Helper: extract YouTube video ID from a URL
+    // Helper: extract YouTube video ID from URL
     function extractVideoID(url) {
       const regExp = /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#&?]*).*/;
       const match = url.match(regExp);
       return (match && match[7].length === 11) ? match[7] : null;
     }
 
-    // Called automatically by the YouTube IFrame API
+    // Called by YouTube IFrame API
     function onYouTubeIframeAPIReady() {
-      // Players will be created when videos are loaded.
+      // Players are created when a video is loaded.
     }
 
     // ----- Deck 1 Functions -----
@@ -193,11 +203,12 @@
       console.log("Deck 1 ready.");
       const rate = parseFloat(document.getElementById('speed-slider1').value);
       player1.setPlaybackRate(rate);
+      const cf = parseInt(document.getElementById('crossfade-slider').value);
+      player1.setVolume(100 - cf);
     }
     function togglePlayPauseDeck1() {
       if (!player1) return;
-      const state = player1.getPlayerState();
-      state === YT.PlayerState.PLAYING ? player1.pauseVideo() : player1.playVideo();
+      player1.getPlayerState() === YT.PlayerState.PLAYING ? player1.pauseVideo() : player1.playVideo();
     }
     function setCueDeck1() {
       if (!player1) return;
@@ -220,18 +231,17 @@
     function setLoopStartDeck1() {
       if (!player1) return;
       loopStart1 = player1.getCurrentTime();
-      alert("Deck 1: Loop start set to " + loopStart1.toFixed(2) + "s");
+      document.getElementById('btn-loop-start1').textContent = "Loop Start: " + loopStart1.toFixed(2) + "s (O)";
     }
     function setLoopEndDeck1() {
       if (!player1) return;
       loopEnd1 = player1.getCurrentTime();
-      alert("Deck 1: Loop end set to " + loopEnd1.toFixed(2) + "s");
+      loopActive1 = true;  // Automatically start loop
+      document.getElementById('btn-loop-end1').textContent = "Loop End: " + loopEnd1.toFixed(2) + "s (P)";
+      document.getElementById('btn-toggle-loop1').textContent = "Toggle Loop: On (L)";
     }
     function toggleLoopDeck1() {
-      if (!player1 || loopStart1 === null || loopEnd1 === null) {
-        alert("Deck 1: Set both loop start and loop end first.");
-        return;
-      }
+      if (!player1 || loopStart1 === null || loopEnd1 === null) return;
       loopActive1 = !loopActive1;
       document.getElementById('btn-toggle-loop1').textContent = loopActive1 ? "Toggle Loop: On (L)" : "Toggle Loop: Off (L)";
     }
@@ -245,6 +255,17 @@
         html += "</ul>";
         listDiv.innerHTML = html;
       }
+    }
+    // Broad and Fine seeking for Deck 1
+    function broadSeekDeck1(delta) {
+      if (!player1) return;
+      let newTime = player1.getCurrentTime() + delta;
+      player1.seekTo(newTime, true);
+    }
+    function fineSeekDeck1(delta) {
+      if (!player1) return;
+      let newTime = player1.getCurrentTime() + delta;
+      player1.seekTo(newTime, true);
     }
 
     // ----- Deck 2 Functions -----
@@ -265,11 +286,12 @@
       console.log("Deck 2 ready.");
       const rate = parseFloat(document.getElementById('speed-slider2').value);
       player2.setPlaybackRate(rate);
+      const cf = parseInt(document.getElementById('crossfade-slider').value);
+      player2.setVolume(cf);
     }
     function togglePlayPauseDeck2() {
       if (!player2) return;
-      const state = player2.getPlayerState();
-      state === YT.PlayerState.PLAYING ? player2.pauseVideo() : player2.playVideo();
+      player2.getPlayerState() === YT.PlayerState.PLAYING ? player2.pauseVideo() : player2.playVideo();
     }
     function setCueDeck2() {
       if (!player2) return;
@@ -292,20 +314,19 @@
     function setLoopStartDeck2() {
       if (!player2) return;
       loopStart2 = player2.getCurrentTime();
-      alert("Deck 2: Loop start set to " + loopStart2.toFixed(2) + "s");
+      document.getElementById('btn-loop-start2').textContent = "Loop Start: " + loopStart2.toFixed(2) + "s (Shift+O)";
     }
     function setLoopEndDeck2() {
       if (!player2) return;
       loopEnd2 = player2.getCurrentTime();
-      alert("Deck 2: Loop end set to " + loopEnd2.toFixed(2) + "s");
+      loopActive2 = true;  // Automatically start loop
+      document.getElementById('btn-loop-end2').textContent = "Loop End: " + loopEnd2.toFixed(2) + "s (Shift+P)";
+      document.getElementById('btn-toggle-loop2').textContent = "Toggle Loop: On (Shift+L)";
     }
     function toggleLoopDeck2() {
-      if (!player2 || loopStart2 === null || loopEnd2 === null) {
-        alert("Deck 2: Set both loop start and loop end first.");
-        return;
-      }
+      if (!player2 || loopStart2 === null || loopEnd2 === null) return;
       loopActive2 = !loopActive2;
-      document.getElementById('btn-toggle-loop2').textContent = loopActive2 ? "Toggle Loop: On (L)" : "Toggle Loop: Off (L)";
+      document.getElementById('btn-toggle-loop2').textContent = loopActive2 ? "Toggle Loop: On (Shift+L)" : "Toggle Loop: Off (Shift+L)";
     }
     function updateCueList2() {
       const listDiv = document.getElementById('cueList2');
@@ -318,6 +339,29 @@
         listDiv.innerHTML = html;
       }
     }
+    // Broad and Fine seeking for Deck 2
+    function broadSeekDeck2(delta) {
+      if (!player2) return;
+      let newTime = player2.getCurrentTime() + delta;
+      player2.seekTo(newTime, true);
+    }
+    function fineSeekDeck2(delta) {
+      if (!player2) return;
+      let newTime = player2.getCurrentTime() + delta;
+      player2.seekTo(newTime, true);
+    }
+
+    // ----- Crossfade Mixer -----
+    document.getElementById('crossfade-slider').addEventListener('input', function(e) {
+      let value = parseInt(e.target.value);
+      document.getElementById('crossfadeValue').textContent = value;
+      if (player1 && typeof player1.setVolume === 'function') {
+        player1.setVolume(100 - value);
+      }
+      if (player2 && typeof player2.setVolume === 'function') {
+        player2.setVolume(value);
+      }
+    });
 
     // ----- Event Listeners -----
     window.addEventListener('DOMContentLoaded', () => {
@@ -325,7 +369,7 @@
       document.getElementById('loadVideo1').addEventListener('click', () => {
         const url = document.getElementById('videoLink1').value;
         const videoId = extractVideoID(url);
-        videoId ? loadVideoDeck1(videoId) : alert("Invalid YouTube link for Deck 1");
+        videoId ? loadVideoDeck1(videoId) : console.error("Invalid YouTube link for Deck 1");
       });
       document.getElementById('btn-play1').addEventListener('click', togglePlayPauseDeck1);
       document.getElementById('btn-set-cue1').addEventListener('click', setCueDeck1);
@@ -336,12 +380,16 @@
       document.getElementById('speed-slider1').addEventListener('input', (e) => {
         changeRateDeck1(parseFloat(e.target.value));
       });
+      document.getElementById('btn-broad-back1').addEventListener('click', () => { broadSeekDeck1(-5); });
+      document.getElementById('btn-broad-forward1').addEventListener('click', () => { broadSeekDeck1(5); });
+      document.getElementById('btn-fine-back1').addEventListener('click', () => { fineSeekDeck1(-0.25); });
+      document.getElementById('btn-fine-forward1').addEventListener('click', () => { fineSeekDeck1(0.25); });
 
       // Deck 2 controls
       document.getElementById('loadVideo2').addEventListener('click', () => {
         const url = document.getElementById('videoLink2').value;
         const videoId = extractVideoID(url);
-        videoId ? loadVideoDeck2(videoId) : alert("Invalid YouTube link for Deck 2");
+        videoId ? loadVideoDeck2(videoId) : console.error("Invalid YouTube link for Deck 2");
       });
       document.getElementById('btn-play2').addEventListener('click', togglePlayPauseDeck2);
       document.getElementById('btn-set-cue2').addEventListener('click', setCueDeck2);
@@ -352,16 +400,19 @@
       document.getElementById('speed-slider2').addEventListener('input', (e) => {
         changeRateDeck2(parseFloat(e.target.value));
       });
+      document.getElementById('btn-broad-back2').addEventListener('click', () => { broadSeekDeck2(-5); });
+      document.getElementById('btn-broad-forward2').addEventListener('click', () => { broadSeekDeck2(5); });
+      document.getElementById('btn-fine-back2').addEventListener('click', () => { fineSeekDeck2(-0.25); });
+      document.getElementById('btn-fine-forward2').addEventListener('click', () => { fineSeekDeck2(0.25); });
     });
 
     // ----- Keyboard Shortcuts -----
     document.addEventListener('keydown', (e) => {
-      // Without Shift => Deck 1; with Shift => Deck 2
       const isShift = e.shiftKey;
       const key = e.key.toLowerCase();
       switch(key) {
         case " ":
-          e.preventDefault(); // Prevent scrolling
+          e.preventDefault();
           isShift ? togglePlayPauseDeck2() : togglePlayPauseDeck1();
           break;
         case "c":
@@ -370,18 +421,39 @@
         case "v":
           isShift ? readCueDeck2() : readCueDeck1();
           break;
+        case "o":
+          isShift ? setLoopStartDeck2() : setLoopStartDeck1();
+          break;
+        case "p":
+          isShift ? setLoopEndDeck2() : setLoopEndDeck1();
+          break;
+        case "l":
+          isShift ? toggleLoopDeck2() : toggleLoopDeck1();
+          break;
+        case "b":
+          isShift ? broadSeekDeck2(-5) : broadSeekDeck1(-5);
+          break;
+        case "n":
+          isShift ? broadSeekDeck2(5) : broadSeekDeck1(5);
+          break;
+        case "j":
+          isShift ? fineSeekDeck2(-0.25) : fineSeekDeck1(-0.25);
+          break;
+        case "k":
+          isShift ? fineSeekDeck2(0.25) : fineSeekDeck1(0.25);
+          break;
         case "arrowup":
           if (isShift) {
             if (player2) {
               let r = player2.getPlaybackRate();
-              r = Math.min(r + 0.25, 2.0);
+              r = Math.min(r + 0.05, 2.0); // Fine adjustment: 0.05 increment
               changeRateDeck2(r);
               document.getElementById('speed-slider2').value = r;
             }
           } else {
             if (player1) {
               let r = player1.getPlaybackRate();
-              r = Math.min(r + 0.25, 2.0);
+              r = Math.min(r + 0.05, 2.0); // Fine adjustment: 0.05 increment
               changeRateDeck1(r);
               document.getElementById('speed-slider1').value = r;
             }
@@ -391,34 +463,23 @@
           if (isShift) {
             if (player2) {
               let r = player2.getPlaybackRate();
-              r = Math.max(r - 0.25, 0.25);
+              r = Math.max(r - 0.05, 0.25); // Fine adjustment: 0.05 decrement
               changeRateDeck2(r);
               document.getElementById('speed-slider2').value = r;
             }
           } else {
             if (player1) {
               let r = player1.getPlaybackRate();
-              r = Math.max(r - 0.25, 0.25);
+              r = Math.max(r - 0.05, 0.25); // Fine adjustment: 0.05 decrement
               changeRateDeck1(r);
               document.getElementById('speed-slider1').value = r;
             }
           }
           break;
-        // Loop keyboard shortcuts
-        case "o": // Set loop start
-          isShift ? setLoopStartDeck2() : setLoopStartDeck1();
-          break;
-        case "p": // Set loop end
-          isShift ? setLoopEndDeck2() : setLoopEndDeck1();
-          break;
-        case "l": // Toggle loop on/off
-          isShift ? toggleLoopDeck2() : toggleLoopDeck1();
-          break;
       }
     });
 
     // ----- Loop Polling -----
-    // Check every 250ms if a deck is in loop mode and if so, loop it.
     setInterval(() => {
       if (loopActive1 && player1 && loopStart1 !== null && loopEnd1 !== null) {
         if (player1.getCurrentTime() >= loopEnd1) {
